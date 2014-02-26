@@ -3,9 +3,9 @@ import json
 import random
 
 @module.rule('$nickname:\ (\w+)')
+@module.rule('^$nickname\ (\w+)$')
 
 def imgurbot(bot, trigger):
-	nickname = trigger.nick
 	subreddit = trigger.group(1)
 	url = "http://www.reddit.com/r/{0}/hot/.json?limit=20".format(subreddit)
 	get = web.get(url, timeout=5)
@@ -19,6 +19,9 @@ def imgurbot(bot, trigger):
 	if 'error' in array:
 		if array['error'] == 404:
 			bot.reply("{0} isn\'t a real subreddit.".format(subreddit))
+			return
+		elif array['error'] == 403:
+			bot.reply("{0} is a private subreddit.".format(subreddit))
 			return
 		else:
 			bot.reply("Unknown error. Whoops.")
