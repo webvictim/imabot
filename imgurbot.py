@@ -2,10 +2,16 @@ from willie import module, web
 import json
 import random
 
+ignored_nicks = ['Paradox']
+
 @module.rule('$nickname:\ (\w+)')
-@module.rule('^$nickname\ (\w+)$')
+@module.rule('^$nickname\ (\w+)')
 
 def imgurbot(bot, trigger):
+	nickname = trigger.nick
+	if nickname in ignored_nicks:
+		return
+
 	subreddit = trigger.group(1)
 	url = "http://www.reddit.com/r/{0}/hot/.json?limit=20".format(subreddit)
 	get = web.get(url, timeout=5)
