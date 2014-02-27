@@ -5,7 +5,7 @@ import random
 ignored_nicks = ['Paradox']
 
 @module.rule('$nickname:\ (\w+)')
-@module.rule('^$nickname\ (\w+)')
+@module.rule('^$nickname\ (\w+)$')
 
 def imgurbot(bot, trigger):
 	nickname = trigger.nick
