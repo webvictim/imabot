@@ -1,11 +1,15 @@
 from willie import module, web
 import json
 import random
+import time
+from operator import itemgetter
 
 ignored_nicks = ['Paradox']
 
 @module.rule('$nickname:\ (\w+)')
 @module.rule('^$nickname\ (\w+)$')
+
+last_seen = {}
 
 def imgurbot(bot, trigger):
 	nickname = trigger.nick
@@ -33,6 +37,8 @@ def imgurbot(bot, trigger):
 			bot.reply("Unknown error. Whoops.")
 			return
 	else:
+		if not last_seen.has_key(subreddit):
+			last_seen[subreddit] = {}
 		links = []
 		iterator = 0
 		while (len(links) < 10) and (iterator < len(array)):
@@ -41,14 +47,19 @@ def imgurbot(bot, trigger):
 					iterator = iterator + 1
 					if child['data']['domain'] == 'i.imgur.com':	
 						if 'over_18' in child['data']:
+							id = child['data']['id']
+							if last_seen[subreddit].has_key(id):
+								child['data']['lastseen'] = last_seen[subreddit][id]
+							else:
+								child['data']['lastseen'] = 0
 							links.append(child['data'])
-
 		if (len(links)>0):
-			index = random.randint(0,(len(links)-1))
+			links = sorted(links, key=itemgetter('lastseen'))
+			last_seen[subreddit][links[0]['id']] = time.time()
 			suffix = ''
-			if (links[index]['over_18'] is True):
+			if (links[0]['over_18'] is True):
 				suffix = ' [nsfw]'
-			bot.say("[{0}] {1} - \"{2}\"{3}".format(subreddit, links[index]['url'], links[index]['title'], suffix))
+			bot.say("[{0}] {1} - \"{2}\"{3}".format(subreddit, links[0]['url'], links[0]['title'], suffix))
 			return
 		else:
 			bot.reply("No imgur links amongst hot posts in r/{0} today.".format(subreddit))
