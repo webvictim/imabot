@@ -15,12 +15,12 @@ class User(object):
         self.posts = []
 
     def posted(self):
-        self.posts.append(time.time())
+        self.posts.append(int(time.time()))
 
     def is_douchebag(self):
         total = 0
         for t in self.posts:
-            if time.time() - t <= 60:
+            if int(time.time()) - t <= 60:
                 total += 1
             else:
                 self.posts.pop(t)
@@ -87,7 +87,7 @@ def imgurbot(bot, trigger):
                             links.append(child['data'])
         if (len(links)>0):
             links = sorted(links, key=itemgetter('lastseen'))
-            last_seen[subreddit][links[0]['id']] = time.time()
+            last_seen[subreddit][links[0]['id']] = int(time.time())
             suffix = ''
             if (links[0]['over_18'] is True):
                 suffix = ' [nsfw]'
