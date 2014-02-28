@@ -5,12 +5,10 @@ import time
 from operator import itemgetter
 
 ignored_nicks = ['Paradox']
+last_seen = {}
 
 @module.rule('$nickname:\ (\w+)')
 @module.rule('^$nickname\ (\w+)$')
-
-last_seen = {}
-
 def imgurbot(bot, trigger):
 	nickname = trigger.nick
 	if nickname in ignored_nicks:
