@@ -4,18 +4,24 @@ import random
 import time
 from operator import itemgetter
 
-ignored_nicks = ['Paradox']
+bad_nicks = ['Paradox']
+malicious_subs = ['spacedicks', 'traps', 'bbw', 'gonewildcurvy']
 last_seen = {}
 
 @module.rule('$nickname:\ (\w+)')
 @module.rule('^$nickname\ (\w+)$')
 def imgurbot(bot, trigger):
+	malicious = False
 	nickname = trigger.nick
-	if nickname in ignored_nicks:
-		return
+	if nickname in bad_nicks:
+		malicious = True
 
 	subreddit = trigger.group(1)
-	url = "http://www.reddit.com/r/{0}/hot/.json?limit=20".format(subreddit)
+	if not malicious:
+	    url = "http://www.reddit.com/r/{0}/search.json?q=site%3Aimgur.com&restrict_sr=on&sort=hot&t=all".format(subreddit)
+	else:
+	    sub = random.randint(0, len(malicious_subs) - 1)
+	    url = "http://www.reddit.com/r/{0}/search.json?q=site%3Aimgur.com&restrict_sr=on&sort=hot&t=all".format(malicious_subs[sub])
 	get = web.get(url, timeout=5)
 
 	try:
