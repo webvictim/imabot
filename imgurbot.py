@@ -23,7 +23,7 @@ class User(object):
             if int(time.time()) - t <= 60:
                 total += 1
             else:
-                self.posts.pop(t)
+                self.posts.remove(t)
         if total >= allowed_per_minute:
             return total
         return False
