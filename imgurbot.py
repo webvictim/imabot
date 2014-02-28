@@ -4,7 +4,7 @@ import random
 import time
 from operator import itemgetter
 
-bad_nicks = ['Paradox']
+bad_nicks = ['Paradox', 'jcrza_']
 last_seen = {}
 
 @module.rule('$nickname:\ (\w+)')
