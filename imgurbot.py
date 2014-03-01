@@ -49,7 +49,7 @@ def imgurbot(bot, trigger):
         mode="controversial"
 
     subreddit = trigger.group(1)
-    url = "http://www.reddit.com/r/{0}/search.json?q=site%3Aimgur.com&restrict_sr=on&sort={1}&t=all".format(subreddit, mode)
+    url = "http://www.reddit.com/r/{0}/search.json?q=site%3Aimgur.com&restrict_sr=on&sort={1}&t=day".format(subreddit, mode)
     get = web.get(url, timeout=5)
 
     try:
