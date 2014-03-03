@@ -16,7 +16,7 @@ allowed_per_minute = 5
 resolved_subreddit = {}
 
 def get_content(phrase, mode, period = "day"):
-    subreddit = phrase
+    subreddit = phrase.lower()
 
     if " " in phrase:
         subreddit_find_string = phrase.replace(" ", "+")
@@ -24,12 +24,15 @@ def get_content(phrase, mode, period = "day"):
             url = json.loads(web.get("http://www.reddit.com/subreddits/search.json?q={0}".format(subreddit_find_string)))
             result = [x['data']['display_name'] for x in url['data']['children'] if x.has_key('data') and x['data'].has_key('display_name') and x['data']['subreddit_type'] != "private"]
             if len(result) > 0:
-                subreddit = result[0]
+                subreddit = result[0].lower()
                 resolved_subreddit[subreddit_find_string] = subreddit
             else:
                 return "I looked for a public subreddit matching that phrase but didn't find one.", None
         else:
             subreddit = resolved_subreddit[subreddit_find_string]
+
+    if not last_seen.has_key(subreddit):
+        last_seen[subreddit] = {}
 
     url = "http://www.reddit.com/r/{0}/search.json?q=site%3Aimgur.com&restrict_sr=on&sort={1}&t={2}".format(subreddit, mode, period)
     get = web.get(url, timeout=5)
@@ -46,8 +49,6 @@ def get_content(phrase, mode, period = "day"):
         else:
             return "Unknown error. Whoops."
     else:
-        if not last_seen.has_key(subreddit):
-            last_seen[subreddit] = {}
         links = []
         iterator = 0
         if 'children' in array['data'] and len(array['data']['children']) > 0:
@@ -83,10 +84,7 @@ class User(object):
             return total
         return False
 
-# [x['data']['display_name'] for x in a['data']['children'] if x.has_key('data') and x['data'].has_key('display_name')]
-
-@module.rule('($nickname\ )(.*)')
-@module.rule('($nickname:\ )(.*)')
+@module.rule('($nickname:?\ )(.*)')
 def imgurbot(bot, trigger):
     nickname = trigger.nick
     if not users.has_key(nickname):
@@ -109,10 +107,13 @@ def imgurbot(bot, trigger):
     reply = []
     for period in ['day','week','month','year','all']:
         reply,subreddit = get_content(phrase, mode, period)
-        if not subreddit or len([x for x in reply if not last_seen[subreddit].has_key(x['id'])]) != 0:
+        if not subreddit or (type(reply) is list and len([x for x in reply if not last_seen[subreddit].has_key(x['id'])]) != 0):
             break
 
     if type(reply) is list and subreddit:
+        if len(reply) == 0:
+            bot.say("I found results but they didn't say if they were nsfw or not.")
+            return
         reply = sorted(reply, key=itemgetter('lastseen'))
         last_seen[subreddit][reply[0]['id']] = int(time.time())
         suffix = ''
