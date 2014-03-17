@@ -69,9 +69,9 @@ def get_content(phrase, mode, period = "day"):
                                         child['data']['lastseen'] = 0
                                     links.append(child['data'])
                 if len(links) == 0:
-                    return "I found results for /r/{0} but they didn't say if they were nsfw or not.".format(subreddit), None
+                    return "I found results for /r/{0} but they didn't say if they were nsfw or not.".format(subreddit), subreddit
             else:
-                return "No imgur posts were found in /r/{0}".format(subreddit), None
+                return "No imgur posts were found in /r/{0}".format(subreddit), subreddit
     return links, subreddit
 
 class User(object):
