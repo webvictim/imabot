@@ -55,18 +55,23 @@ def get_content(phrase, mode, period = "day"):
     else:
         links = []
         iterator = 0
-        if 'children' in array['data'] and len(array['data']['children']) > 0:
-            while (len(links) < 10) and (iterator < len(array)):
-                    for child in array['data']['children']:
-                        iterator = iterator + 1
-                        if child['data']['domain'] == 'i.imgur.com':    
-                            if 'over_18' in child['data']:
-                                id = child['data']['id']
-                                if last_seen[subreddit].has_key(id):
-                                    child['data']['lastseen'] = last_seen[subreddit][id]
-                                else:
-                                    child['data']['lastseen'] = 0
-                                links.append(child['data'])
+        if 'children' in array['data']:
+            if len(array['data']['children']) > 0:
+                while (len(links) < 10) and (iterator < len(array)):
+                        for child in array['data']['children']:
+                            iterator = iterator + 1
+                            if child['data']['domain'] == 'i.imgur.com':    
+                                if 'over_18' in child['data']:
+                                    id = child['data']['id']
+                                    if last_seen[subreddit].has_key(id):
+                                        child['data']['lastseen'] = last_seen[subreddit][id]
+                                    else:
+                                        child['data']['lastseen'] = 0
+                                    links.append(child['data'])
+                if len(links) == 0:
+                    return "I found results for /r/{0} but they didn't say if they were nsfw or not.".format(subreddit), None
+            else:
+                return "No imgur posts were found in /r/{0}".format(subreddit), None
     return links, subreddit
 
 class User(object):
@@ -115,9 +120,6 @@ def imgurbot(bot, trigger):
             break
 
     if type(reply) is list and subreddit:
-        if len(reply) == 0:
-            bot.say("I found results but they didn't say if they were nsfw or not.")
-            return
         reply = sorted(reply, key=itemgetter('lastseen'))
         last_seen[subreddit][reply[0]['id']] = int(time.time())
         suffix = ''
