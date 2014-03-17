@@ -21,7 +21,11 @@ def get_content(phrase, mode, period = "day"):
     if " " in phrase:
         subreddit_find_string = phrase.replace(" ", "+")
         if not resolved_subreddit.has_key(subreddit_find_string):
-            url = json.loads(web.get("http://www.reddit.com/subreddits/search.json?q={0}".format(subreddit_find_string)))
+            try:
+                url = json.loads(web.get("http://www.reddit.com/subreddits/search.json?q={0}".format(subreddit_find_string)))
+            except ValueError:
+                return "There was an error with your query. Reddit is probably having trouble", None
+                
             result = [x['data']['display_name'] for x in url['data']['children'] if x.has_key('data') and x['data'].has_key('display_name') and x['data']['subreddit_type'] != "private"]
             if len(result) > 0:
                 subreddit = result[0].lower()
