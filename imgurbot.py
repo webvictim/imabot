@@ -108,13 +108,15 @@ def imgurbot(bot, trigger):
         return
 
     mode = "hot"
+    periods = ['day','week','month','year','all']
 
     if nickname in bad_nicks:
-        mode="controversial"
+        mode = "controversial"
+        periods = ['all']
 
     phrase = trigger.group(2)
     reply = []
-    for period in ['day','week','month','year','all']:
+    for period in periods:
         reply,subreddit = get_content(phrase, mode, period)
         if not subreddit or (type(reply) is list and len([x for x in reply if not last_seen[subreddit].has_key(x['id'])]) != 0):
             break
