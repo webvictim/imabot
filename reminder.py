@@ -42,8 +42,9 @@ def setup(bot):
     bot.rfn = filename(bot)
     bot.rdb = load_database(bot.rfn)
 
-# this is pretty inefficient as it runs through the entire list once for every message that gets sent to any channel that the bot is part of
-# better way would be to make the 
+# this is pretty inefficient as it runs through the entire list once for
+# every message that gets sent to any channel that the bot is part of
+# better way would be to make the reminders keyed on nick and just check that
 @module.rule('.*')
 def reminder_check(bot, trigger):
     """Runs on every incoming message to see whether we have any reminders to give to the given nickname."""
@@ -51,15 +52,22 @@ def reminder_check(bot, trigger):
     if unixtimes:
         for unixtime in unixtimes:
             for (channel, nick, target_nick, message) in bot.rdb[unixtime]:
+                # does this nick have any reminders?
                 if (target_nick == trigger.nick):
-                    # rewrite sender if it's yourself
+                    # rewrite the sender if it's yourself
                     if nick == target_nick:
-                        target_nick = 'you'
-                    bot.msg(channel, "{0}, {1} asked me to remind you: {2}".format(target_nick, nick, message))
+                        nick = 'you'
+                    # send the reminder message to whatever channel the person spoke in
+                    bot.msg(trigger.sender, "{0}, {1} asked me to remind you: {2}".format(target_nick, nick, message))
                     del bot.rdb[unixtime]
         dump_database(bot.rfn, bot.rdb)
 
+@module.rule("!remind")
+def remind_help(bot, trigger):
+    return bot.say("Syntax: !remind <nick> <message> .e.g !remind pairadicks hey, read this message")
+
 @module.rule("!remind ([\S]+)\ (.*)")
+@module.rule("remind (me) (.*)")
 def remind(bot, trigger):
     """Gives the given nick a reminder next time they speak."""
     if trigger.group(1):
@@ -67,9 +75,12 @@ def remind(bot, trigger):
         if trigger.group(2):
             message = trigger.group(2)
         else:
-            return bot.reply("Syntax: !remind <nick> <message> .e.g !remind muzak hey, read this message")
+            return bot.reply("Syntax: !remind <nick> <message> .e.g !remind pairadicks hey, read this message")
     else:
-        return bot.reply("Syntax: !remind <nick> <message> .e.g !remind muzak hey, read this message")
+        return bot.reply("Syntax: !remind <nick> <message> .e.g !remind pairadicks hey, read this message")
+
+    if target_nick == "me":
+        target_nick = trigger.nick; 
     
     create_reminder(bot, trigger, target_nick, message)
 
