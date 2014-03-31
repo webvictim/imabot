@@ -33,10 +33,13 @@ def load_database(name):
 
 def dump_database(name, data):
     f = codecs.open(name, 'w', encoding='utf-8')
-    for unixtime, reminders in data.iteritems():
-        for channel, nick, target_nick, message in reminders:
-            f.write('{0}\t{1}\t{2}\t{3}\t{4}\n'.format(unixtime, channel, nick, target_nick, message))
-    f.close()
+    try:
+        for unixtime, reminders in data.iteritems():
+            for channel, nick, target_nick, message in reminders:
+                f.write('{0}\t{1}\t{2}\t{3}\t{4}\n'.format(unixtime, channel, nick, target_nick, message))
+        f.close()
+    except RuntimeError:
+        pass
 
 def setup(bot):
     bot.rfn = filename(bot)
@@ -62,22 +65,19 @@ def reminder_check(bot, trigger):
                     del bot.rdb[unixtime]
         dump_database(bot.rfn, bot.rdb)
 
-@module.rule("!remind")
-def remind_help(bot, trigger):
-    return bot.say("Syntax: !remind <nick> <message> .e.g !remind pairadicks hey, read this message")
+#def remind_help(bot, trigger):
+#    return bot.say("Syntax: !remind <nick> <message>")
 
+@module.rule("!remind$")
 @module.rule("!remind ([\S]+)\ (.*)")
-@module.rule("remind (me) (.*)")
+@module.rule("remind (me)\ (.*)")
 def remind(bot, trigger):
     """Gives the given nick a reminder next time they speak."""
-    if trigger.group(1):
+    try:
         target_nick = trigger.group(1)
-        if trigger.group(2):
-            message = trigger.group(2)
-        else:
-            return bot.reply("Syntax: !remind <nick> <message> .e.g !remind pairadicks hey, read this message")
-    else:
-        return bot.reply("Syntax: !remind <nick> <message> .e.g !remind pairadicks hey, read this message")
+        message = trigger.group(2)
+    except IndexError:
+        return bot.reply("Syntax: !remind <nick> <message>")
 
     if target_nick == "me":
         target_nick = trigger.nick; 
