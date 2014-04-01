@@ -24,7 +24,7 @@ def get_content(phrase, mode, period = "day"):
             try:
                 url = json.loads(web.get("http://www.reddit.com/subreddits/search.json?q={0}".format(subreddit_find_string)))
             except ValueError:
-                return "There was an error with your query. Reddit is probably having trouble", None
+                return "There was an error with your query. Reddit is probably having trouble.", None
                 
             result = [x['data']['display_name'] for x in url['data']['children'] if x.has_key('data') and x['data'].has_key('display_name') and x['data']['subreddit_type'] != "private"]
             if len(result) > 0:
@@ -43,13 +43,13 @@ def get_content(phrase, mode, period = "day"):
     try:
         array = json.loads(get)
     except ValueError:
-        return "{0} doesn't look like a subreddit to me.".format(subreddit), subreddit
+        return "/r/{0} doesn't look like a subreddit to me.".format(subreddit), subreddit
 
     if 'error' in array:
         if array['error'] == 404:
-            return "{0} isn\'t a real subreddit.".format(subreddit), subreddit
+            return "/r/{0} isn\'t a real subreddit.".format(subreddit), subreddit
         elif array['error'] == 403:
-            return "{0} is a private subreddit.".format(subreddit), subreddit
+            return "/r/{0} is a private subreddit.".format(subreddit), subreddit
         else:
             return "Unknown error. Whoops."
     else:
@@ -71,7 +71,7 @@ def get_content(phrase, mode, period = "day"):
                 if len(links) == 0:
                     return "I found results for /r/{0} but they didn't say if they were nsfw or not.".format(subreddit), subreddit
             else:
-                return "No imgur posts were found in /r/{0}".format(subreddit), subreddit
+                return "No imgur posts were found in http://www.reddit.com/r/{0}".format(subreddit), subreddit
     return links, subreddit
 
 class User(object):

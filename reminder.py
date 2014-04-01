@@ -53,7 +53,7 @@ def reminder_check(bot, trigger):
     """Runs on every incoming message to see whether we have any reminders to give to the given nickname."""
     unixtimes = [int(key) for key in bot.rdb]
     if unixtimes:
-        for unixtime in unixtimes:
+        for unixtime in sorted(unixtimes):
             for (channel, nick, target_nick, message) in bot.rdb[unixtime]:
                 # does this nick have any reminders?
                 if (target_nick == trigger.nick):
