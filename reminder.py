@@ -12,7 +12,7 @@ from datetime import datetime
 from willie import module, web
 
 def filename(self):
-    name = self.nick + '-' + self.config.host + '.reminders.db'
+    name = self.nick + '-' + self.config.user + '.reminders.db'
     return os.path.join(self.config.dotdir, name)
 
 def load_database(name):
