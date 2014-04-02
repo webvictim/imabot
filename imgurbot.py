@@ -5,7 +5,7 @@ import time
 from operator import itemgetter
 
 # Track people who get a shitty sort
-bad_nicks = ['Paradox']
+bad_nicks = ['Paradox', 'memebot']
 # Track if if and when we've seen a particular content id
 last_seen = {}
 # Track usage so we can rate control
