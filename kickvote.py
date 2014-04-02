@@ -12,6 +12,9 @@ vote_threshold = 3
 kick_bot = "ChanServ"
 kick_command = "BAN {0} +1h {1} You were democratically kickvoted by {2}!"
 
+# whitelisted channels that the bot can run in
+kickvote_whitelist = ['#random','#gus','#general']
+
 @module.rule('!votekick (\S+)')
 @module.rule('!vk (\S+)')
 @module.rule('!kickvote (\S+)')
@@ -25,18 +28,18 @@ def process_vote(bot, trigger):
         return
 
     channel = trigger.sender
+    if channel not in kickvote_whitelist:
+        return
 
     # find the nick of the person being voted for on the channel
     if vote_nick in bot.privileges[channel].keys():
+        vote_nick = vote_nick.lower()
         if (has_voted_for(channel, trigger.nick, vote_nick)):
             bot.reply("You've already voted against {0}.".format(vote_nick))
             return
         else:
             if add_vote(channel, trigger.nick, vote_nick):
-                if (trigger.nick == vote_nick):
-                    bot.reply("Voting for yourself?! If you insist... vote registered.".format(vote_nick))
-                else:
-                    bot.reply("Vote for {0} registered.".format(vote_nick))
+                bot.reply("Vote for {0} registered.".format(vote_nick))
             else:
                 bot.say("Something went wrong. Whoops!")
                 
@@ -64,10 +67,13 @@ def process_unvote(bot, trigger):
         return
     
     channel = trigger.sender
+    if channel not in kickvote_whitelist:
+        return
     vote_nick = trigger.group(1)
 
     # find the nick of the person being voted for on the channel
     if vote_nick in bot.privileges[channel].keys():
+        vote_nick = vote_nick.lower()
         if remove_vote(channel, trigger.nick, vote_nick):
             bot.reply("Vote unregistered.")
         else:
@@ -88,6 +94,8 @@ def votestatus(bot, trigger):
     if '#' not in trigger.sender:
         return
     channel = trigger.sender
+    if channel not in kickvote_whitelist:
+        return
 
     """Format a nice listing of all the current votes and display it."""
     replies = []
@@ -108,8 +116,10 @@ def votestatus(bot, trigger):
 def nick_tracker(bot, trigger):
     """Track and process nick changes."""
     channel = trigger.sender
-    old_nick = trigger.nick
-    new_nick = tools.Nick(trigger)
+    if channel not in kickvote_whitelist:
+        return
+    old_nick = trigger.nick.lower()
+    new_nick = tools.Nick(trigger).lower()
     counts = replace_votes(channel, old_nick, new_nick)
     print "{0} renicked to {1} on {2} - votes_from changed = {3}, votes_against changed = {4}".format(old_nick, new_nick, channel, counts['votes_from_affected'], counts['votes_against_affected'])
 
@@ -120,7 +130,9 @@ def nick_tracker(bot, trigger):
 def leave_tracker(bot, trigger):
     """Removes all votes for a nick if it somehow leaves the channel."""
     channel = trigger.sender
-    nick_affected = trigger.nick
+    if channel not in kickvote_whitelist:
+        return
+    nick_affected = trigger.nick.lower()
     removed_count = remove_all_votes_for(channel, nick_affected)
     print "{0} is gone from {1}, {2} votes removed.".format(nick_affected, channel, removed_count)
 
@@ -129,6 +141,8 @@ def leave_tracker(bot, trigger):
 def create_vote_list(bot, trigger):
     """Create a list for each channel when the bot joins."""
     channel = trigger.sender
+    if channel not in kickvote_whitelist:
+        return
     try:
         if trigger.nick == bot.nick and votes[channel]:
             pass
