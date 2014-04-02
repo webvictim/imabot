@@ -1,5 +1,5 @@
 """
-votekick.py - Willie Democracy Module
+kickvote.py - Willie Democracy Module
 Written by webvictim <webvictim@gmail.com>
 """
 
