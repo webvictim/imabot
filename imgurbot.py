@@ -4,6 +4,7 @@ import random
 import urllib
 import time
 from operator import itemgetter
+import unicodedata
 
 # Track people who get a shitty sort
 bad_nicks = ['Paradox', 'fumyl']
@@ -17,13 +18,14 @@ allowed_per_minute = 5
 resolved_subreddit = {}
 
 def get_content(phrase, mode, period = "day"):
-    subreddit = phrase.lower()
+    subreddit = unicodedata.normalize("NFKD", phrase).encode('ascii','ignore').lower()
+    if subreddit == "":
+        return "Your input is bad and you should feel bad.", None
 
-    if " " in phrase:
-        subreddit_find_string = urllib.quote(phrase)
+    if " " in subreddit:
+        subreddit_find_string = subreddit.replace(' ','+')
         if not resolved_subreddit.has_key(subreddit_find_string):
             try:
-                #url = json.loads(web.get("http://www.reddit.com/subreddits/search.json?q={0}".format(subreddit_find_string)))
                 url = json.loads(web.get("http://www.reddit.com/subreddits/search.json?q=%s" % (subreddit_find_string)))
             except ValueError:
                 return "There was an error with your query. Reddit is probably having trouble.", None
@@ -140,3 +142,4 @@ def imgurbot(bot, trigger):
     elif type(reply) is str:
         bot.reply(reply)
         return
+
