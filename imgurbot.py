@@ -1,6 +1,7 @@
 from willie import module, web
 import json
 import random
+import urllib
 import time
 from operator import itemgetter
 
@@ -19,7 +20,7 @@ def get_content(phrase, mode, period = "day"):
     subreddit = phrase.lower()
 
     if " " in phrase:
-        subreddit_find_string = phrase.replace(" ", "+")
+        subreddit_find_string = urllib.quote(phrase)
         if not resolved_subreddit.has_key(subreddit_find_string):
             try:
                 url = json.loads(web.get("http://www.reddit.com/subreddits/search.json?q={0}".format(subreddit_find_string)))
@@ -38,7 +39,7 @@ def get_content(phrase, mode, period = "day"):
     if not last_seen.has_key(subreddit):
         last_seen[subreddit] = {}
 
-    url = "http://www.reddit.com/r/{0}/search.json?q=site%3Aimgur.com&restrict_sr=on&sort={1}&t={2}".format(subreddit, mode, period)
+    url = "http://www.reddit.com/r/{0}/search.json?q=site%3Aimgur.com&restrict_sr=on&sort={1}&t={2}".format(subreddit.encode('ascii','ignore'), mode, period)
     get = web.get(url, timeout=5)
     try:
         array = json.loads(get)
