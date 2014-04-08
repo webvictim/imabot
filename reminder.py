@@ -36,7 +36,9 @@ def dump_database(name, data):
     try:
         for unixtime, reminders in data.iteritems():
             for channel, nick, target_nick, message in reminders:
-                f.write('{0}\t{1}\t{2}\t{3}\t{4}\n'.format(unixtime, channel, nick, target_nick, message))
+                #f.write('{0}\t{1}\t{2}\t{3}\t{4}\n'.format(unixtime, channel, nick, target_nick, message))
+                f.write('%s\t%s\t%s\t%s\t%s\n' % (unixtime, channel, nick, target_nick, message))
+
         f.close()
     except RuntimeError:
         pass
@@ -61,7 +63,8 @@ def reminder_check(bot, trigger):
                     if nick == target_nick:
                         nick = 'you'
                     # send the reminder message to whatever channel the person spoke in
-                    bot.msg(trigger.sender, "{0}, {1} asked me to remind you: {2}".format(target_nick, nick, message))
+                    #bot.msg(trigger.sender, "{0}, {1} asked me to remind you: {2}".format(target_nick, nick, message))
+                    bot.msg(trigger.sender, "%s, %s asked me to remind you: %s" % (target_nick, nick, message))
                     del bot.rdb[unixtime]
         dump_database(bot.rfn, bot.rdb)
 
