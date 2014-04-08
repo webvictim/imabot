@@ -22,7 +22,8 @@ def get_content(phrase, mode, period = "day"):
         subreddit_find_string = phrase.replace(" ", "+")
         if not resolved_subreddit.has_key(subreddit_find_string):
             try:
-                url = json.loads(web.get("http://www.reddit.com/subreddits/search.json?q={0}".format(subreddit_find_string)))
+                #url = json.loads(web.get("http://www.reddit.com/subreddits/search.json?q={0}".format(subreddit_find_string)))
+                url = json.loads(web.get("http://www.reddit.com/subreddits/search.json?q=%s" % (subreddit_find_string)))
             except ValueError:
                 return "There was an error with your query. Reddit is probably having trouble.", None
                 
@@ -40,18 +41,22 @@ def get_content(phrase, mode, period = "day"):
 
     url = "http://www.reddit.com/r/{0}/search.json?q=site%3Aimgur.com&restrict_sr=on&sort={1}&t={2}".format(subreddit, mode, period)
     get = web.get(url, timeout=5)
+
     try:
         array = json.loads(get)
     except ValueError:
-        return "/r/{0} doesn't look like a subreddit to me.".format(subreddit), subreddit
+        #return "/r/{0} doesn't look like a subreddit to me.".format(subreddit), subreddit
+        return "/r/%s doesn't look like a subreddit to me." % (subreddit), subreddit
 
     if 'error' in array:
         if array['error'] == 404:
-            return "/r/{0} isn\'t a real subreddit.".format(subreddit), subreddit
+            #return "/r/{0} isn\'t a real subreddit.".format(subreddit), subreddit
+            return "/r/%s isn\'t a real subreddit." % (subreddit), subreddit
         elif array['error'] == 403:
-            return "/r/{0} is a private subreddit.".format(subreddit), subreddit
+            #return "/r/{0} is a private subreddit.".format(subreddit), subreddit
+            return "/r/%s is a private subreddit." % (subreddit), subreddit
         else:
-            return "Unknown error. Whoops."
+            return "Unknown error. Whoops.", None
     else:
         links = []
         iterator = 0
@@ -69,9 +74,11 @@ def get_content(phrase, mode, period = "day"):
                                         child['data']['lastseen'] = 0
                                     links.append(child['data'])
                 if len(links) == 0:
-                    return "I found results for /r/{0} but they didn't say if they were nsfw or not.".format(subreddit), subreddit
+                    #return "I found results for /r/{0} but they didn't say if they were nsfw or not.".format(subreddit), subreddit
+                    return "I found results for /r/%s but they didn't say if they were nsfw or not." % (subreddit), subreddit
             else:
-                return "No imgur posts were found in http://www.reddit.com/r/{0}".format(subreddit), subreddit
+                #return "No imgur posts were found in http://www.reddit.com/r/{0}".format(subreddit), subreddit
+                return "No imgur posts were found in http://www.reddit.com/r/%s" % (subreddit), subreddit
     return links, subreddit
 
 class User(object):
@@ -127,7 +134,7 @@ def imgurbot(bot, trigger):
         suffix = ''
         if (reply[0]['over_18'] is True):
             suffix = ' [nsfw]'
-        bot.say("[{0}] {1} - \"{2}\"{3}".format(subreddit, reply[0]['url'], reply[0]['title'], suffix))
+        bot.say("[%s] %s - \"%s\"%s" % (subreddit, reply[0]['url'], reply[0]['title'], suffix))
         return
     elif type(reply) is str:
         bot.reply(reply)
