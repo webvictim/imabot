@@ -125,7 +125,7 @@ def imgurbot(bot, trigger):
         periods = ['all']
 
     phrase = trigger.group(2)
-    reply = []
+    reply = None
     for period in periods:
         reply,subreddit = get_content(phrase, mode, period)
         if not subreddit or (type(reply) is list and len([x for x in reply if not last_seen[subreddit].has_key(x['id'])]) != 0):
