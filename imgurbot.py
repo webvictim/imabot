@@ -79,9 +79,9 @@ def get_content(phrase, mode, period = "day"):
                 if len(links) == 0:
                     #return "I found results for /r/{0} but they didn't say if they were nsfw or not.".format(subreddit), subreddit
                     return "I found results for /r/%s but they didn't say if they were nsfw or not." % (subreddit), subreddit
-            else:
-                #return "No imgur posts were found in http://www.reddit.com/r/{0}".format(subreddit), subreddit
-                return "No imgur posts were found in http://www.reddit.com/r/%s" % (subreddit), subreddit
+        else:
+            #return "No imgur posts were found in http://www.reddit.com/r/{0}".format(subreddit), subreddit
+            return "No imgur posts were found in http://www.reddit.com/r/%s" % (subreddit), subreddit
     return links, subreddit
 
 class User(object):
