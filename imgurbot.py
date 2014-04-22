@@ -77,11 +77,7 @@ def get_content(phrase, mode, period = "day"):
                                         child['data']['lastseen'] = 0
                                     links.append(child['data'])
                 if len(links) == 0:
-                    #return "I found results for /r/{0} but they didn't say if they were nsfw or not.".format(subreddit), subreddit
                     return "I found results for /r/%s but they didn't say if they were nsfw or not." % (subreddit), subreddit
-        else:
-            #return "No imgur posts were found in http://www.reddit.com/r/{0}".format(subreddit), subreddit
-            return "No imgur posts were found in http://www.reddit.com/r/%s" % (subreddit), subreddit
     return links, subreddit
 
 class User(object):
@@ -132,13 +128,16 @@ def imgurbot(bot, trigger):
             break
 
     if type(reply) is list and subreddit:
-        reply = sorted(reply, key=itemgetter('lastseen'))
-        last_seen[subreddit][reply[0]['id']] = int(time.time())
-        suffix = ''
-        if (reply[0]['over_18'] is True):
-            suffix = ' [nsfw]'
-        bot.say("[%s] %s - \"%s\"%s" % (subreddit, reply[0]['url'], reply[0]['title'], suffix))
-        return
+        if len(reply) == 0:
+            bot.say("No imgur posts were found in /r/{0}".format(subreddit))
+        else:
+            reply = sorted(reply, key=itemgetter('lastseen'))
+            last_seen[subreddit][reply[0]['id']] = int(time.time())
+            suffix = ''
+            if (reply[0]['over_18'] is True):
+                suffix = ' [nsfw]'
+            bot.say("[%s] %s - \"%s\"%s" % (subreddit, reply[0]['url'], reply[0]['title'], suffix))
+            return
     elif type(reply) is str:
         bot.reply(reply)
         return
