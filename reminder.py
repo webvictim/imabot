@@ -73,7 +73,7 @@ def reminder_check(bot, trigger):
 
 @module.rule("!remind$")
 @module.rule("!remind ([\S]+)\ (.*)")
-@module.rule("remind (me)\ (.*)")
+#@module.rule("remind (me)\ (.*)")
 def remind(bot, trigger):
     """Gives the given nick a reminder next time they speak."""
     try:
