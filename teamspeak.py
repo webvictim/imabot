@@ -147,4 +147,4 @@ def teamspeak_check(bot, trigger):
         bot.msg(say_channel, "Something's wrong. Sorry :(")
     else:
         old_nicks = nicks
-        bot.msg(say_channel, "People on Teamspeak: %s" % (", ".join(obfuscate_list(nicks))))
+        bot.msg(say_channel, "Teamspeak: 85.236.100.27:26307 | People online: %s" % (", ".join(obfuscate_list(nicks))))
