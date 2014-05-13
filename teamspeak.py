@@ -1,6 +1,6 @@
 """
 reminder.py - Willie Teamspeak Module
-Modifications by webvictim <webvictim@gmail.com>
+Written by webvictim <webvictim@gmail.com>
 """
 
 import urllib
