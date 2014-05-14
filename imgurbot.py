@@ -6,8 +6,6 @@ import time
 from operator import itemgetter
 import unicodedata
 
-# Track people who get a shitty sort
-bad_nicks = ['Paradox', 'fumyl']
 # Track if if and when we've seen a particular content id
 last_seen = {}
 # Track usage so we can rate control
@@ -68,7 +66,7 @@ def get_content(phrase, mode, period = "day"):
                 while (len(links) < 10) and (iterator < len(array)):
                         for child in array['data']['children']:
                             iterator = iterator + 1
-                            if child['data']['domain'] == 'i.imgur.com':    
+                            if child['data'].has_key('domain') and child['data']['domain'] == 'i.imgur.com':    
                                 if 'over_18' in child['data']:
                                     id = child['data']['id']
                                     if last_seen[subreddit].has_key(id):
@@ -76,6 +74,7 @@ def get_content(phrase, mode, period = "day"):
                                     else:
                                         child['data']['lastseen'] = 0
                                     links.append(child['data'])
+
                 if len(links) == 0:
                     return "I found results for /r/%s but they didn't say if they were nsfw or not." % (subreddit), subreddit
     return links, subreddit
@@ -115,10 +114,6 @@ def imgurbot(bot, trigger):
 
     mode = "hot"
     periods = ['day','week','month','year','all']
-
-    if nickname in bad_nicks:
-        mode = "controversial"
-        periods = ['all']
 
     phrase = trigger.group(2)
     reply = None
