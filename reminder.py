@@ -23,7 +23,7 @@ def load_database(name):
             db_key, unixtime, channel, nick, target_nick, message = line.split('\t')
             message = message.rstrip('\n')
             #t = int(float(unixtime))  # WTFs going on here?
-            reminder = (channel, nick, target_nick, message)
+            reminder = (unixtime, channel, nick, target_nick, message)
             try:
                 #data[t].append(reminder)
                 data[db_key].append(reminder)
@@ -60,6 +60,7 @@ def reminder_check(bot, trigger):
     db_keys = [key for key in bot.rdb]
     if db_keys:
         for db_key in sorted(db_keys):
+            print bot.rdb[db_key]
             for (unixtime, channel, nick, target_nick, message) in bot.rdb[db_key]:
                 # does this nick have any reminders?
                 if (target_nick == trigger.nick):
