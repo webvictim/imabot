@@ -1,6 +1,7 @@
 """
 reminder.py - Willie Reminder Module
 Modifications by webvictim <webvictim@gmail.com>
+Further Modifications by jcrza
 """
 
 import os
@@ -20,15 +21,12 @@ def load_database(name):
     if os.path.isfile(name):
         f = codecs.open(name, 'r', encoding='utf-8')
         for line in f:
-            db_key, unixtime, channel, nick, target_nick, message = line.split('\t')
+            db_key, unixtime, channel, nick, message = line.split('\t')
             message = message.rstrip('\n')
-            #t = int(float(unixtime))  # WTFs going on here?
-            reminder = (unixtime, channel, nick, target_nick, message)
+            reminder = (unixtime, channel, nick, message)
             try:
-                #data[t].append(reminder)
                 data[db_key].append(reminder)
             except KeyError:
-                #data[t] = [reminder]
                 data[db_key] = [reminder]
         f.close()
     return data
@@ -37,11 +35,8 @@ def dump_database(name, data):
     f = codecs.open(name, 'w', encoding='utf-8')
     try:
         for db_key, reminders in data.iteritems():
-            for unixtime, channel, nick, target_nick, message in reminders:
-                #f.write('{0}\t{1}\t{2}\t{3}\t{4}\n'.format(unixtime, channel, nick, target_nick, message))
-                db_key = "_".join([str(unixtime), str(channel), str(nick), str(target_nick)])
-                f.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (db_key, unixtime, channel, nick, target_nick, message))
-
+            for unixtime, channel, nick, message in reminders:
+                f.write('%s\t%s\t%s\t%s\t%s\n' % (nick, unixtime, channel, nick, message))
         f.close()
     except RuntimeError:
         pass
@@ -50,31 +45,23 @@ def setup(bot):
     bot.rfn = filename(bot)
     bot.rdb = load_database(bot.rfn)
 
-# this is pretty inefficient as it runs through the entire list once for
-# every message that gets sent to any channel that the bot is part of
-# better way would be to make the reminders keyed on nick and just check that
-@module.rule('.*')
+@module.rule('^(?!\!remind$).*')
 def reminder_check(bot, trigger):
     """Runs on every incoming message to see whether we have any reminders to give to the given nickname."""
-    #unixtimes = [int(key) for key in bot.rdb]
     db_keys = [key for key in bot.rdb]
     if db_keys:
-        for db_key in sorted(db_keys):
-            for (unixtime, channel, nick, target_nick, message) in bot.rdb[db_key]:
-                # does this nick have any reminders?
-                if (target_nick == trigger.nick):
-                    # rewrite the sender if it's yourself
-                    if nick == target_nick:
-                        nick = 'you'
-                    # send the reminder message to whatever channel the person spoke in
-                    #bot.msg(trigger.sender, "{0}, {1} asked me to remind you: {2}".format(target_nick, nick, message))
-                    bot.msg(trigger.sender, "%s, %s asked me to remind you: %s" % (target_nick, nick, message))
-                    del bot.rdb[db_key]
-        dump_database(bot.rfn, bot.rdb)
+        if trigger.nick in sorted(db_keys):
+            for (unixtime, channel, nick, message) in bot.rdb[trigger.nick]:
+                # rewrite the sender if it's yourself
+                if nick == trigger.nick:
+                    nick = 'you'
+                # send the reminder message to whatever channel the person spoke in
+                bot.msg(trigger.sender, "%s, %s asked me to remind you: %s" % (trigger.nick, nick, message))
+            del bot.rdb[trigger.nick]
+            dump_database(bot.rfn, bot.rdb)
 
 @module.rule("!remind$")
 @module.rule("!remind ([\S,]+)\ (.*)")
-#@module.rule("remind (me)\ (.*)")
 def remind(bot, trigger):
     if "#" not in trigger.sender:
         bot.msg(trigger.sender, "Only works in channels, dickface.")
@@ -104,12 +91,11 @@ def create_reminder(bot, trigger, target_nick_list, message):
     # built-in deduplication
     for nick_to_remind in list(set(target_nick_list)):
         unixtime = int(time.time())
-        db_key = '_'.join([str(unixtime), str(trigger.sender), str(trigger.nick), str(nick_to_remind)])
-        reminder = (unixtime, trigger.sender, trigger.nick, nick_to_remind, message)
+        reminder = (unixtime, trigger.sender, trigger.nick, message)
         try:
-            bot.rdb[db_key].append(reminder)
+            bot.rdb[nick_to_remind].append(reminder)
         except KeyError:
-            bot.rdb[db_key] = [reminder]
+            bot.rdb[nick_to_remind] = [reminder]
 
         reminder_counter += 1
         dump_database(bot.rfn, bot.rdb)
@@ -118,4 +104,3 @@ def create_reminder(bot, trigger, target_nick_list, message):
         bot.reply("%s reminders remembered." % reminder_counter)
     else:
         bot.reply('Reminder remembered.')
-
