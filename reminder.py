@@ -60,7 +60,6 @@ def reminder_check(bot, trigger):
     db_keys = [key for key in bot.rdb]
     if db_keys:
         for db_key in sorted(db_keys):
-            print bot.rdb[db_key]
             for (unixtime, channel, nick, target_nick, message) in bot.rdb[db_key]:
                 # does this nick have any reminders?
                 if (target_nick == trigger.nick):
@@ -77,6 +76,10 @@ def reminder_check(bot, trigger):
 @module.rule("!remind ([\S,]+)\ (.*)")
 #@module.rule("remind (me)\ (.*)")
 def remind(bot, trigger):
+    if "#" not in trigger.sender:
+        bot.msg(trigger.sender, "Only works in channels, dickface.")
+        return
+
     """Gives the given nick a reminder next time they speak."""
     try:
         target_nick = trigger.group(1)
