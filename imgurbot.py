@@ -14,6 +14,8 @@ users = {}
 allowed_per_minute = 5
 # Already resolved phrase:subreddit mappings to save time
 resolved_subreddit = {}
+# List of allowed domains for results
+allowed_domains = ['i.imgur.com', 'gfycat.com']
 
 def get_content(phrase, mode, period = "day"):
     subreddit = unicodedata.normalize("NFKD", phrase).encode('ascii','ignore').lower()
@@ -40,7 +42,7 @@ def get_content(phrase, mode, period = "day"):
     if not last_seen.has_key(subreddit):
         last_seen[subreddit] = {}
 
-    url = "http://www.reddit.com/r/{0}/search.json?q=site%3Aimgur.com&restrict_sr=on&sort={1}&t={2}".format(subreddit.encode('ascii','ignore'), mode, period)
+    url = "http://www.reddit.com/r/{0}/search.json?restrict_sr=on&sort={1}&t={2}".format(subreddit.encode('ascii','ignore'), mode, period)
     get = web.get(url, timeout=5)
 
     try:
@@ -66,7 +68,7 @@ def get_content(phrase, mode, period = "day"):
                 while (len(links) < 10) and (iterator < len(array)):
                         for child in array['data']['children']:
                             iterator = iterator + 1
-                            if child['data'].has_key('domain') and child['data']['domain'] == 'i.imgur.com':    
+                            if child['data'].has_key('domain') and child['data']['domain'] in allowed_domains:
                                 if 'over_18' in child['data']:
                                     id = child['data']['id']
                                     if last_seen[subreddit].has_key(id):
