@@ -43,10 +43,12 @@ def reminder_check(bot, trigger):
     had_reminder = False
     if bot.rdb.has_key(check_nick):
         for reminder in bot.rdb[check_nick]:
-            had_reminder = True
-            if reminder['from'].lower() == check_nick:
-                reminder['from'] = 'you'
-            bot.msg(trigger.sender, "%s, %s asked me to remind you: %s" % (trigger.nick, reminder['from'], reminder['message']))
+            # was the reminder left in the same channel? if not, don't send it here
+            if reminder['channel'] == trigger.sender:
+                had_reminder = True
+                if reminder['from'].lower() == check_nick:
+                    reminder['from'] = 'you'
+                bot.msg(trigger.sender, "%s, %s asked me to remind you: %s" % (trigger.nick, reminder['from'], reminder['message']))
     if had_reminder:
         discard = bot.rdb.pop(trigger.nick, None)
     dump_database(bot.fn, bot.rdb)
