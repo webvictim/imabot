@@ -50,7 +50,7 @@ def reminder_check(bot, trigger):
                     reminder['from'] = 'you'
                 bot.msg(trigger.sender, "%s, %s asked me to remind you: %s" % (trigger.nick, reminder['from'], reminder['message']))
     if had_reminder:
-        discard = bot.rdb.pop(trigger.nick, None)
+        discard = bot.rdb.pop(check_nick, None)
     dump_database(bot.fn, bot.rdb)
 
 @module.rule("!remind$")
