@@ -8,15 +8,16 @@ from willie import module, web, tools
 
 votes = {}
 vote_threshold = 3
+ban_duration = "1h"
 
 kick_bot = "ChanServ"
-kick_command = "BAN {0} +1h {1} You were democratically kickvoted by {2}!"
+kick_command = "BAN {0} +{3} {1} You were democratically kickvoted by {2}!"
 
 # whitelisted channels that the bot can run in
 kickvote_whitelist = ['#random','#gus','#general']
 
-@module.rule('!votekick (\S+)')
-@module.rule('!vk (\S+)')
+#@module.rule('!votekick (\S+)')
+#@module.rule('!vk (\S+)')
 @module.rule('!kickvote (\S+)')
 @module.rule('!kv (\S+)')
 def process_vote(bot, trigger):
@@ -51,13 +52,18 @@ def process_vote(bot, trigger):
                     kick_voters = format_voter_list_for_kick(who_voted_for(channel, nick))
                     bot.say("{0}, you are the weakest link. Goodbye!".format(nick))
                     # do actual kick here
-                    bot.msg(kick_bot, kick_command.format(channel, nick, kick_voters))
+                    bot.msg(kick_bot, kick_command.format(channel, nick, kick_voters, ban_duration))
                     remove_all_votes_for(channel, nick)
     else:
         bot.reply("I can't find {0} on the channel.".format(vote_nick))
 
-@module.rule('!unvotekick (\S+)')
-@module.rule('!uvk (\S+)')
+@module.rule('^!kickvote$')
+@module.rule('^!kv$')
+def kickvote_info(bot, trigger):
+    bot.say("Syntax: !kickvote <nick> or !kv <nick> - registers a vote to kick a given nick from the channel. If that nick receives {0} votes in total, they will be banned from the channel for {1}. You can remove a vote with !unkickvote <nick> or !ukv <nick>. !kickvotestatus shows current vote counts.".format(vote_threshold, ban_duration))
+
+#@module.rule('!unvotekick (\S+)')
+#@module.rule('!uvk (\S+)')
 @module.rule('!unkickvote (\S+)')
 @module.rule('!ukv (\S+)')
 def process_unvote(bot, trigger):
@@ -83,13 +89,13 @@ def process_unvote(bot, trigger):
 
 @module.rule('!votestatus')
 @module.rule('!kickvotestatus')
-@module.rule('!votekickstatus')
-@module.rule('!kvstatus')
-@module.rule('!vkstatus')
-@module.rule('!vks')
-@module.rule('!kvs')
-@module.rule('!vs')
-@module.rule('!ks')
+#@module.rule('!votekickstatus')
+#@#module.rule('!kvstatus')
+#@module.rule('!vkstatus')
+#@module.rule('!vks')
+#@module.rule('!kvs')
+#@module.rule('!vs')
+#@module.rule('!ks')
 def votestatus(bot, trigger):
     if '#' not in trigger.sender:
         return
