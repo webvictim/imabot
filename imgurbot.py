@@ -78,7 +78,7 @@ def get_content(phrase, mode, period = "day"):
                                     links.append(child['data'])
 
                 if len(links) == 0:
-                    return "I found results for /r/%s but they didn't say if they were nsfw or not." % (subreddit), subreddit
+                    return "I found results for /r/%s but none were from imgur or gfycat." % (subreddit), subreddit
     return links, subreddit
 
 class User(object):
