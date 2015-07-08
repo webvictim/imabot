@@ -15,7 +15,9 @@ allowed_per_minute = 5
 # Already resolved phrase:subreddit mappings to save time
 resolved_subreddit = {}
 # List of allowed domains for results
-allowed_domains = ['i.imgur.com', 'gfycat.com']
+allowed_domains = ['i.imgur.com', 'gfycat.com', 'imgur.com']
+# Show debug output (URLs loaded)
+debug = True
 
 def get_content(phrase, mode, period = "day"):
     subreddit = unicodedata.normalize("NFKD", phrase).encode('ascii','ignore').lower()
@@ -26,7 +28,10 @@ def get_content(phrase, mode, period = "day"):
         subreddit_find_string = subreddit.replace(' ','+')
         if not resolved_subreddit.has_key(subreddit_find_string):
             try:
-                url = json.loads(web.get("http://www.reddit.com/subreddits/search.json?q=%s" % (subreddit_find_string)))
+                load_this_url = "http://www.reddit.com/subreddits/search.json?q=%s" % (subreddit_find_string)
+                if debug:
+                    print "web.get -> %s" % (load_this_url)
+                url = json.loads(web.get(load_this_url))
             except ValueError:
                 return "There was an error with your query. Reddit is probably having trouble.", None
                 
@@ -42,8 +47,15 @@ def get_content(phrase, mode, period = "day"):
     if not last_seen.has_key(subreddit):
         last_seen[subreddit] = {}
 
-    url = "http://www.reddit.com/r/{0}/search.json?restrict_sr=on&sort={1}&t={2}".format(subreddit.encode('ascii','ignore'), mode, period)
-    get = web.get(url, timeout=5)
+    ascii_subreddit = subreddit.encode('ascii','ignore')
+    url = "http://www.reddit.com/r/{0}/search.json?restrict_sr=on&sort={1}&t={2}".format(ascii_subreddit, mode, period)
+    if debug:
+        print "web.get -> %s" % (url)
+
+    try:
+        get = web.get(url, timeout=5)
+    except:
+        return "Couldn't load any results for r/%s as Reddit didn't respond in a timely fashion. Sorry." % (subreddit), subreddit
 
     try:
         array = json.loads(get)
