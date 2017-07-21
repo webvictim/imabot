@@ -25,7 +25,7 @@ def get_content(phrase, mode, period = "day"):
         return "Your input is bad and you should feel bad.", None
 
     if " " in subreddit:
-        subreddit_find_string = subreddit.replace(' ','+')
+        subreddit_find_string = subreddit.replace(' ','+').strip()
         if not resolved_subreddit.has_key(subreddit_find_string):
             try:
                 load_this_url = "http://www.reddit.com/subreddits/search.json?q=%s" % (subreddit_find_string)
@@ -34,7 +34,7 @@ def get_content(phrase, mode, period = "day"):
                 url = json.loads(web.get(load_this_url))
             except ValueError:
                 return "There was an error with your query. Reddit is probably having trouble.", None
-                
+
             result = [x['data']['display_name'] for x in url['data']['children'] if x.has_key('data') and x['data'].has_key('display_name') and x['data']['subreddit_type'] != "private"]
             if len(result) > 0:
                 subreddit = result[0].lower()
